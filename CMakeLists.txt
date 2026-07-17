@@ -9,20 +9,19 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
 qt_standard_project_setup(REQUIRES 6.8)
 
 qt_add_executable(Parrot
-    main.cpp
+    src/main.cpp
     src/data/abstractrepository.h
     src/data/databasemanager.cpp
     src/data/songrepository.h
     src/data/databasemanager.h
     src/data/songrepository.cpp
-    src/domain.cpp
-    src/domain.h
+    src/data/domain.cpp
+    src/data/domain.h
     src/data/playlistrepository.h
     src/data/playlistrepository.cpp
     src/data/albumrepository.h
     src/data/albumrepository.cpp
     src/data/accountrepository.h
-
     src/data/listenerrepository.h
     src/data/listenerrepository.cpp
     src/data/artistrepository.h
