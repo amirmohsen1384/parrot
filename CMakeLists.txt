@@ -26,6 +26,11 @@ qt_add_executable(Parrot
     src/data/listenerrepository.cpp
     src/data/artistrepository.h
     src/data/artistrepository.cpp
+    src/services/accountservice.h
+    src/services/accountservice.cpp
+    src/services/artistservice.h
+    src/services/artistservice.cpp
+
 )
 
 set_target_properties(Parrot PROPERTIES
@@ -48,5 +53,7 @@ install(TARGETS Parrot
 )
 
 target_include_directories(Parrot
-    PRIVATE src/
+    PRIVATE
+    src/
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
