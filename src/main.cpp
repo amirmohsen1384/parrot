@@ -1,5 +1,5 @@
 #include <QApplication>
-#include "src/data/databasemanager.h"
+#include "data/databasemanager.h"
 
 int main(int argc, char *argv[])
 {
