@@ -18,8 +18,8 @@ public:
     AlbumList albums(ID artistId) const;
 
 private:
+    std::optional<ID> insert(const AlbumData &value);
     static Album fromQuery(const QSqlQuery &query);
-    std::optional<ID> insert(const Album &value);
     bool update(const Album &value);
 };
 

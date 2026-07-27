@@ -24,9 +24,9 @@ public:
     SongList byAlbum(ID albumId) const;
 
 private:
-    std::optional<ID> update(const Song &value);
-    std::optional<ID> insert(const Song &value);
+    std::optional<ID> insert(const SongData &value);
     static Song fromQuery(const QSqlQuery &query);
+    std::optional<ID> update(const Song &value);
 };
 
 #endif // SONGREPOSITORY_H

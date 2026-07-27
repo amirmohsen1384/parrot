@@ -17,10 +17,10 @@ public:
     std::optional<ID> save(const Account &value) override;
     bool remove(ID value) override;
 
-private:
-    static Account fromQuery(const QSqlQuery &query);
-    std::optional<ID> insert(const Account &value);
-    bool update(const Account &value);
+protected:
+    virtual std::optional<ID> insert(const AccountData &value) override;
+    virtual Account fromQuery(const QSqlQuery &query) const override;
+    virtual bool update(const Account &value) override;
 };
 
 #endif // ARTISTREPOSITORY_H

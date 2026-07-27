@@ -1,45 +1,65 @@
 #ifndef DOMAIN_H
 #define DOMAIN_H
 
+#define INVALID_ID -1
+
 #include <QString>
 #include <QPixmap>
 #include <QUrl>
 
 using ID = qint64;
-constexpr int InvalidId = 0;
+
+struct AccountData
+{
+    enum Role {
+        Unknown,
+        Listener,
+        Artist
+    };
+    QImage photo;
+    QString name;
+    QString userName;
+    QString password;
+    QString biography;
+    Role role = Role::Unknown;
+};
 
 struct Account
 {
-    enum Role {Unknown, Listener, Artist};
+    ID id = INVALID_ID;
+    AccountData data;
+};
+
+struct PlaylistData
+{
     QString name;
-    QString userName;
-    QString biography;
-    ID id = InvalidId;
-    Role role = Role::Unknown;
-    QString password;
-    QImage photo;
+    ID ownerId = INVALID_ID;
 };
 
 struct Playlist
 {
-    ID id = 0;
-    QString name;
-    ID ownerId = 0;
+    ID id = INVALID_ID;
+    PlaylistData data;
 };
 
 using PlaylistList = QList<Playlist>;
 
-struct Album
+struct AlbumData
 {
     QString name;
     QImage photo;
-    ID id = InvalidId;
-    ID ownerId = InvalidId;
+    ID ownerId = INVALID_ID;
+};
+
+struct Album
+{
+    ID id = INVALID_ID;
+    AlbumData data;
 };
 
 using AlbumList = QList<Album>;
 
-struct Song
+struct SongData
 {
     enum class Genre
     {
@@ -54,12 +74,17 @@ struct Song
     };
     QString name;
     QUrl fileName;
-    qint64 releasedYear = InvalidId;
+    qint64 releasedYear = INVALID_ID;
     Genre genre = Genre::Unknown;
-    ID id = InvalidId;
-    ID artistId = InvalidId;
-    ID albumId = InvalidId;
+    ID artistId = INVALID_ID;
+    ID albumId = INVALID_ID;
     QImage cover;
+};
+
+struct Song
+{
+    ID id = INVALID_ID;
+    SongData data;
 };
 
 using SongList = QList<Song>;

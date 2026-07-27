@@ -86,23 +86,16 @@ bool ListenerRepository::setLiked(ID listenerId, ID songId, bool liked)
     }
 }
 
-Account ListenerRepository::fromQuery(const QSqlQuery &query)
+Account ListenerRepository::fromQuery(const QSqlQuery &query) const
 {
-    Account result;
-    result.id = query.value("id").value<ID>();
-    result.userName = query.value("user_name").toString();
-    result.password = query.value("password").toString();
-    result.name = query.value("name").toString();
-    result.biography = query.value("biography").toString();
-    result.photo = Utility::Image::fromRawData(query.value("photo").toByteArray());
-    result.role = Account::Listener;
-    return result;
+    Account target = AccountRepository::fromQuery(query);
+    target.data.role = AccountData::Listener;
+    return target;
 }
 
-std::optional<ID> ListenerRepository::insert(const Account &value)
+std::optional<ID> ListenerRepository::insert(const AccountData &value)
 {
     QSqlQuery query;
-
     query.prepare(R"(
         INSERT INTO Listeners(
             user_name,
@@ -145,31 +138,30 @@ bool ListenerRepository::update(const Account &value)
             photo = :photo
         WHERE id = :id
     )");
+    query.bindValue(":photo", Utility::Image::toRawData(value.data.photo));
+    query.bindValue(":biography", value.data.biography);
+    query.bindValue(":user_name", value.data.userName);
+    query.bindValue(":password", value.data.password);
+    query.bindValue(":name", value.data.name);
     query.bindValue(":id", value.id);
-    query.bindValue(":user_name", value.userName);
-    query.bindValue(":password", value.password);
-    query.bindValue(":name", value.name);
-    query.bindValue(":biography", value.biography);
-    query.bindValue(":photo", Utility::Image::toRawData(value.photo));
     if (!query.exec())
     {
         qWarning() << "Failed to update listener:" << query.lastError().text();
         return false;
     }
-
     return query.numRowsAffected() > 0;
 }
 
 std::optional<ID> ListenerRepository::save(const Account &value)
 {
-    if (value.role != Account::Listener)
+    if (value.data.role != AccountData::Listener)
     {
         qWarning() << "Attempted to save a non-listener using the listener repository.";
         return std::nullopt;
     }
-    if (value.id == InvalidId)
+    if (value.id == INVALID_ID)
     {
-        return insert(value);
+        return insert(value.data);
     }
     if (update(value))
     {
@@ -215,7 +207,6 @@ std::optional<Account> ListenerRepository::searchByUserName(const QString &userN
 bool ListenerRepository::remove(ID value)
 {
     QSqlQuery query;
-
     query.prepare(R"(DELETE FROM Listeners WHERE id = :id)");
     query.bindValue(":id", value);
     if (!query.exec())

@@ -21,10 +21,11 @@ public:
 
     bool isLiked(ID listenerId, ID songId) const;
     bool setLiked(ID listenerId, ID songId, bool liked = true);
-private:
-    static Account fromQuery(const QSqlQuery &query);
-    std::optional<ID> insert(const Account &value);
-    bool update(const Account &value);
+
+protected:
+    virtual std::optional<ID> insert(const AccountData &value) override;
+    virtual Account fromQuery(const QSqlQuery &query) const override;
+    virtual bool update(const Account &value) override;
 };
 
 #endif

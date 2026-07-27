@@ -17,20 +17,14 @@ ArtistRepository &ArtistRepository::instance()
     return repository;
 }
 
-Account ArtistRepository::fromQuery(const QSqlQuery &query)
+Account ArtistRepository::fromQuery(const QSqlQuery &query) const
 {
-    Account result;
-    result.id = query.value("id").value<ID>();
-    result.userName = query.value("user_name").toString();
-    result.password = query.value("password").toString();
-    result.name = query.value("name").toString();
-    result.biography = query.value("biography").toString();
-    result.photo = Utility::Image::fromRawData(query.value("photo").toByteArray());
-    result.role = Account::Artist;
+    auto result = AccountRepository::fromQuery(query);
+    result.data.role = AccountData::Artist;
     return result;
 }
 
-std::optional<ID> ArtistRepository::insert(const Account &value)
+std::optional<ID> ArtistRepository::insert(const AccountData &value)
 {
     QSqlQuery query;
     query.prepare(R"(
@@ -49,11 +43,11 @@ std::optional<ID> ArtistRepository::insert(const Account &value)
             :photo
         )
     )");
+    query.bindValue(":photo", Utility::Image::toRawData(value.photo));
+    query.bindValue(":biography", value.biography);
     query.bindValue(":user_name", value.userName);
     query.bindValue(":password", value.password);
     query.bindValue(":name", value.name);
-    query.bindValue(":biography", value.biography);
-    query.bindValue(":photo", Utility::Image::toRawData(value.photo));
     if (!query.exec())
     {
         qWarning() << "Failed to insert artist:" << query.lastError().text();
@@ -76,11 +70,11 @@ bool ArtistRepository::update(const Account &value)
         WHERE id = :id
     )");
     query.bindValue(":id", value.id);
-    query.bindValue(":user_name", value.userName);
-    query.bindValue(":password", value.password);
-    query.bindValue(":name", value.name);
-    query.bindValue(":biography", value.biography);
-    query.bindValue(":photo", Utility::Image::toRawData(value.photo));
+    query.bindValue(":name", value.data.name);
+    query.bindValue(":user_name", value.data.userName);
+    query.bindValue(":password", value.data.password);
+    query.bindValue(":biography", value.data.biography);
+    query.bindValue(":photo", Utility::Image::toRawData(value.data.photo));
     if (!query.exec())
     {
         qWarning() << "Failed to update artist:" << query.lastError().text();
@@ -91,20 +85,19 @@ bool ArtistRepository::update(const Account &value)
 
 std::optional<ID> ArtistRepository::save(const Account &value)
 {
-    if (value.role != Account::Artist)
+    if (value.data.role != AccountData::Artist)
     {
         qWarning() << "Cannot save a non-artist account using the artist repository.";
         return std::nullopt;
     }
-    if (value.id == InvalidId)
+    if (value.id == INVALID_ID)
     {
-        return insert(value);
+        return insert(value.data);
     }
-    if (update(value))
+    else
     {
-        return value.id;
+        return update(value);
     }
-    return std::nullopt;
 }
 
 std::optional<Account> ArtistRepository::search(ID value) const
@@ -138,7 +131,6 @@ std::optional<Account> ArtistRepository::searchByUserName(const QString &userNam
     {
         return std::nullopt;
     }
-
     return fromQuery(query);
 }
 

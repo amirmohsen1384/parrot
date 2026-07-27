@@ -15,7 +15,7 @@ AlbumRepository &AlbumRepository::instance()
     return repository;
 }
 
-std::optional<ID> AlbumRepository::insert(const Album &value)
+std::optional<ID> AlbumRepository::insert(const AlbumData &value)
 {
     QSqlQuery query;
     query.prepare(R"(
@@ -38,7 +38,6 @@ std::optional<ID> AlbumRepository::insert(const Album &value)
         qWarning() << "Failed to insert album:" << query.lastError().text();
         return std::nullopt;
     }
-
     return query.lastInsertId().value<ID>();
 }
 
@@ -54,9 +53,9 @@ bool AlbumRepository::update(const Album &value)
         WHERE id = :id
     )");
     query.bindValue(":id", value.id);
-    query.bindValue(":name", value.name);
-    query.bindValue(":artist_id", value.ownerId);
-    query.bindValue(":cover", Utility::Image::toRawData(value.photo));
+    query.bindValue(":name", value.data.name);
+    query.bindValue(":artist_id", value.data.ownerId);
+    query.bindValue(":cover", Utility::Image::toRawData(value.data.photo));
     if (!query.exec())
     {
         qWarning() << "Failed to update album:" << query.lastError().text();
@@ -68,9 +67,9 @@ bool AlbumRepository::update(const Album &value)
 
 std::optional<ID> AlbumRepository::save(const Album &value)
 {
-    if (value.id == InvalidId)
+    if (value.id == INVALID_ID)
     {
-        return insert(value);
+        return insert(value.data);
     }
     else
     {
@@ -82,9 +81,9 @@ Album AlbumRepository::fromQuery(const QSqlQuery &query)
 {
     Album result;
     result.id = query.value("id").value<ID>();
-    result.name = query.value("name").toString();
-    result.ownerId = query.value("artist_id").value<ID>();
-    result.photo = Utility::Image::fromRawData(query.value("cover").toByteArray());
+    result.data.name = query.value("name").toString();
+    result.data.ownerId = query.value("artist_id").value<ID>();
+    result.data.photo = Utility::Image::fromRawData(query.value("cover").toByteArray());
     return result;
 }
 
@@ -115,7 +114,7 @@ bool AlbumRepository::remove(ID value)
         qWarning() << "Failed to remove album:" << query.lastError().text();
         return false;
     }
-    return query.numRowsAffected() == 1;
+    return query.numRowsAffected() > 0;
 }
 
 AlbumList AlbumRepository::albums(ID artistId) const

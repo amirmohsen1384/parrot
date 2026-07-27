@@ -13,8 +13,13 @@ constexpr auto SongColumns = R"(
     Songs.cover AS cover
 )";
 
-std::optional<ID> SongRepository::insert(const Song &value)
+std::optional<ID> SongRepository::insert(const SongData &value)
 {
+    if (value.artistId == INVALID_ID)
+    {
+        qWarning() << "Failed to insert song: no artist ID associated.";
+        return std::nullopt;
+    }
     QSqlQuery query;
     query.prepare(R"(
         INSERT INTO Songs(
@@ -37,11 +42,11 @@ std::optional<ID> SongRepository::insert(const Song &value)
         )
     )");
     query.bindValue(":file_name", value.fileName.toLocalFile());
-    query.bindValue(":released_year", value.releasedYear);
     query.bindValue(":genre", static_cast<int>(value.genre));
-    query.bindValue(":name", value.name);
+    query.bindValue(":released_year", value.releasedYear);
     query.bindValue(":artist_id", value.artistId);
-    if (value.albumId == InvalidId)
+    query.bindValue(":name", value.name);
+    if (value.albumId == INVALID_ID)
     {
         query.bindValue(":album_id", QVariant(QMetaType::fromType<ID>()));
     }
@@ -49,6 +54,7 @@ std::optional<ID> SongRepository::insert(const Song &value)
     {
         query.bindValue(":album_id", value.albumId);
     }
+
     query.bindValue(":cover", Utility::Image::toRawData(value.cover));
 
     if (!query.exec())
@@ -64,18 +70,23 @@ Song SongRepository::fromQuery(const QSqlQuery &query)
 {
     Song result;
     result.id = query.value("id").value<ID>();
-    result.name = query.value("name").toString();
-    result.fileName = QUrl::fromLocalFile(query.value("file_name").toString());
-    result.genre = static_cast<Song::Genre>(query.value("genre").toInt());
-    result.releasedYear = query.value("released_year").toLongLong();
-    result.cover = Utility::Image::fromRawData(query.value("cover").toByteArray());
-    result.albumId = query.value("album_id").value<ID>();
-    result.artistId = query.value("artist_id").value<ID>();
+    result.data.name = query.value("name").toString();
+    result.data.fileName = QUrl::fromLocalFile(query.value("file_name").toString());
+    result.data.genre = static_cast<SongData::Genre>(query.value("genre").toInt());
+    result.data.releasedYear = query.value("released_year").toLongLong();
+    result.data.cover = Utility::Image::fromRawData(query.value("cover").toByteArray());
+    result.data.albumId = query.value("album_id").value<ID>();
+    result.data.artistId = query.value("artist_id").value<ID>();
     return result;
 }
 
 std::optional<ID> SongRepository::update(const Song &value)
 {
+    if (value.data.artistId == INVALID_ID)
+    {
+        qWarning() << "Failed to update song: no artist ID associated.";
+        return std::nullopt;
+    }
     QSqlQuery query;
     query.prepare(R"(
         UPDATE Songs
@@ -90,35 +101,33 @@ std::optional<ID> SongRepository::update(const Song &value)
         WHERE id = :id
     )");
     query.bindValue(":id", value.id);
-    query.bindValue(":file_name", value.fileName.toLocalFile());
-    query.bindValue(":released_year", value.releasedYear);
-    query.bindValue(":genre", static_cast<int>(value.genre));
-    query.bindValue(":name", value.name);
-    query.bindValue(":artist_id", value.artistId);
-    if (value.albumId == InvalidId)
+    query.bindValue(":file_name", value.data.fileName.toLocalFile());
+    query.bindValue(":released_year", value.data.releasedYear);
+    query.bindValue(":genre", static_cast<int>(value.data.genre));
+    query.bindValue(":name", value.data.name);
+    query.bindValue(":artist_id", value.data.artistId);
+    if (value.data.albumId == INVALID_ID)
     {
         query.bindValue(":album_id", QVariant(QMetaType::fromType<ID>()));
     }
     else
     {
-        query.bindValue(":album_id", value.albumId);
+        query.bindValue(":album_id", value.data.albumId);
     }
-
-    query.bindValue(":cover", Utility::Image::toRawData(value.cover));
+    query.bindValue(":cover", Utility::Image::toRawData(value.data.cover));
     if (!query.exec())
     {
         qWarning() << "Failed to update song:" << query.lastError().text();
         return std::nullopt;
     }
-
     return value.id;
 }
 
 std::optional<ID> SongRepository::save(const Song &value)
 {
-    if (value.id == InvalidId)
+    if (value.id == INVALID_ID)
     {
-        return insert(value);
+        return insert(value.data);
     }
     else
     {

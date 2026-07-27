@@ -30,7 +30,11 @@ qt_add_executable(Parrot
     src/services/accountservice.cpp
     src/services/artistservice.h
     src/services/artistservice.cpp
-
+    src/services/listenerservice.h
+    src/services/listenerservice.cpp
+    src/services/playlistservice.h
+    src/services/playlistservice.cpp
+    src/data/accountrepository.cpp
 )
 
 set_target_properties(Parrot PROPERTIES

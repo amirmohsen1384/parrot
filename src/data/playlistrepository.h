@@ -22,8 +22,8 @@ public:
     static PlaylistRepository& instance();
 
 private:
+    std::optional<ID> insert(const PlaylistData &playlist);
     static Playlist fromQuery(const QSqlQuery &query);
-    std::optional<ID> insert(const Playlist &playlist);
     std::optional<ID> update(const Playlist &playlist);
 };
 
