@@ -1,7 +1,7 @@
 #ifndef SONGREPOSITORY_H
 #define SONGREPOSITORY_H
 
-#include "data/abstractrepository.h"
+#include "abstractrepository.h"
 #include <QSqlQuery>
 
 class SongRepository : public AbstractRepository<Song>
@@ -24,9 +24,9 @@ public:
     SongList byAlbum(ID albumId) const;
 
 private:
-    std::optional<ID> insert(const SongData &value);
-    static Song fromQuery(const QSqlQuery &query);
+    std::optional<ID> insert(const Song &value);
     std::optional<ID> update(const Song &value);
+    static Song fromQuery(const QSqlQuery &query);
 };
 
 #endif // SONGREPOSITORY_H

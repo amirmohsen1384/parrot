@@ -11,18 +11,18 @@ constexpr auto PlaylistColumns = R"(
 Playlist PlaylistRepository::fromQuery(const QSqlQuery &query)
 {
     Playlist result;
-    result.data.ownerId = query.value("owner_id").value<ID>();
-    result.data.name = query.value("name").toString();
     result.id = query.value("id").value<ID>();
+    result.data.name = query.value("name").toString();
+    result.ownerId = query.value("owner_id").value<ID>();
     return result;
 }
 
-std::optional<ID> PlaylistRepository::insert(const PlaylistData &playlist)
+std::optional<ID> PlaylistRepository::insert(const Playlist &playlist)
 {
     QSqlQuery query;
     query.prepare(R"(INSERT INTO Playlists(owner_id, name) VALUES(:owner_id, :name))");
     query.bindValue(":owner_id", playlist.ownerId);
-    query.bindValue(":name", playlist.name);
+    query.bindValue(":name", playlist.data.name);
     if (!query.exec())
     {
         qWarning() << "Failed to insert the playlist:" << query.lastError().text();
@@ -35,7 +35,7 @@ std::optional<ID> PlaylistRepository::update(const Playlist &playlist)
 {
     QSqlQuery query;
     query.prepare(R"(UPDATE Playlists SET owner_id = :owner_id, name = :name WHERE id = :id)");
-    query.bindValue(":owner_id", playlist.data.ownerId);
+    query.bindValue(":owner_id", playlist.ownerId);
     query.bindValue(":name", playlist.data.name);
     query.bindValue(":id", playlist.id);
     if (!query.exec())
@@ -62,7 +62,7 @@ std::optional<ID> PlaylistRepository::save(const Playlist &value)
 {
     if (value.id == INVALID_ID)
     {
-        return insert(value.data);
+        return insert(value);
     }
     else
     {

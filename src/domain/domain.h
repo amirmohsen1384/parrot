@@ -28,18 +28,22 @@ struct Account
 {
     ID id = INVALID_ID;
     AccountData data;
+    Account() = default;
+    Account(const AccountData &info) : data(info) {}
 };
 
 struct PlaylistData
 {
     QString name;
-    ID ownerId = INVALID_ID;
 };
 
 struct Playlist
 {
+    ID ownerId = INVALID_ID;
     ID id = INVALID_ID;
     PlaylistData data;
+    Playlist() = default;
+    Playlist(const PlaylistData &info) : data(info) {}
 };
 
 using PlaylistList = QList<Playlist>;
@@ -48,13 +52,15 @@ struct AlbumData
 {
     QString name;
     QImage photo;
-    ID ownerId = INVALID_ID;
 };
 
 struct Album
 {
+    ID ownerId = INVALID_ID;
     ID id = INVALID_ID;
     AlbumData data;
+    Album() = default;
+    Album(const AlbumData &info) : data(info) {}
 };
 
 using AlbumList = QList<Album>;
@@ -72,19 +78,21 @@ struct SongData
         Folk,
         Country
     };
+    QImage cover;
     QString name;
     QUrl fileName;
-    qint64 releasedYear = INVALID_ID;
+    qint64 releasedYear = 0;
     Genre genre = Genre::Unknown;
-    ID artistId = INVALID_ID;
-    ID albumId = INVALID_ID;
-    QImage cover;
 };
 
 struct Song
 {
+    ID ownerId = INVALID_ID;
+    ID albumId = INVALID_ID;
     ID id = INVALID_ID;
     SongData data;
+    Song() = default;
+    Song(const SongData &info) : data(info) {}
 };
 
 using SongList = QList<Song>;

@@ -13,9 +13,9 @@ constexpr auto SongColumns = R"(
     Songs.cover AS cover
 )";
 
-std::optional<ID> SongRepository::insert(const SongData &value)
+std::optional<ID> SongRepository::insert(const Song &value)
 {
-    if (value.artistId == INVALID_ID)
+    if (value.ownerId == INVALID_ID)
     {
         qWarning() << "Failed to insert song: no artist ID associated.";
         return std::nullopt;
@@ -41,12 +41,12 @@ std::optional<ID> SongRepository::insert(const SongData &value)
             :cover
         )
     )");
-    query.bindValue(":file_name", value.fileName.toLocalFile());
-    query.bindValue(":genre", static_cast<int>(value.genre));
-    query.bindValue(":released_year", value.releasedYear);
-    query.bindValue(":artist_id", value.artistId);
-    query.bindValue(":name", value.name);
-    if (value.albumId == INVALID_ID)
+    query.bindValue(":file_name", value.data.fileName.toLocalFile());
+    query.bindValue(":genre", static_cast<int>(value.data.genre));
+    query.bindValue(":released_year", value.data.releasedYear);
+    query.bindValue(":artist_id", value.ownerId);
+    query.bindValue(":name", value.data.name);
+    if (value.ownerId == INVALID_ID)
     {
         query.bindValue(":album_id", QVariant(QMetaType::fromType<ID>()));
     }
@@ -55,7 +55,7 @@ std::optional<ID> SongRepository::insert(const SongData &value)
         query.bindValue(":album_id", value.albumId);
     }
 
-    query.bindValue(":cover", Utility::Image::toRawData(value.cover));
+    query.bindValue(":cover", Utility::Image::toRawData(value.data.cover));
 
     if (!query.exec())
     {
@@ -75,14 +75,14 @@ Song SongRepository::fromQuery(const QSqlQuery &query)
     result.data.genre = static_cast<SongData::Genre>(query.value("genre").toInt());
     result.data.releasedYear = query.value("released_year").toLongLong();
     result.data.cover = Utility::Image::fromRawData(query.value("cover").toByteArray());
-    result.data.albumId = query.value("album_id").value<ID>();
-    result.data.artistId = query.value("artist_id").value<ID>();
+    result.albumId = query.value("album_id").value<ID>();
+    result.ownerId = query.value("artist_id").value<ID>();
     return result;
 }
 
 std::optional<ID> SongRepository::update(const Song &value)
 {
-    if (value.data.artistId == INVALID_ID)
+    if (value.ownerId == INVALID_ID)
     {
         qWarning() << "Failed to update song: no artist ID associated.";
         return std::nullopt;
@@ -105,14 +105,14 @@ std::optional<ID> SongRepository::update(const Song &value)
     query.bindValue(":released_year", value.data.releasedYear);
     query.bindValue(":genre", static_cast<int>(value.data.genre));
     query.bindValue(":name", value.data.name);
-    query.bindValue(":artist_id", value.data.artistId);
-    if (value.data.albumId == INVALID_ID)
+    query.bindValue(":artist_id", value.ownerId);
+    if (value.ownerId == INVALID_ID)
     {
         query.bindValue(":album_id", QVariant(QMetaType::fromType<ID>()));
     }
     else
     {
-        query.bindValue(":album_id", value.data.albumId);
+        query.bindValue(":album_id", value.ownerId);
     }
     query.bindValue(":cover", Utility::Image::toRawData(value.data.cover));
     if (!query.exec())
@@ -127,7 +127,7 @@ std::optional<ID> SongRepository::save(const Song &value)
 {
     if (value.id == INVALID_ID)
     {
-        return insert(value.data);
+        return insert(value);
     }
     else
     {

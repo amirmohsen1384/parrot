@@ -1,7 +1,7 @@
 #ifndef ALBUMREPOSITORY_H
 #define ALBUMREPOSITORY_H
 
-#include "data/abstractrepository.h"
+#include "abstractrepository.h"
 
 class AlbumRepository : public AbstractRepository<Album>
 {
@@ -18,8 +18,8 @@ public:
     AlbumList albums(ID artistId) const;
 
 private:
-    std::optional<ID> insert(const AlbumData &value);
     static Album fromQuery(const QSqlQuery &query);
+    std::optional<ID> insert(const Album &data);
     bool update(const Album &value);
 };
 

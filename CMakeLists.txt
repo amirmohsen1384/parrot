@@ -4,37 +4,16 @@ project(Parrot VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
+add_subdirectory(src/domain)
+
+add_subdirectory(src/repository)
+
 qt_add_executable(Parrot
     src/main.cpp
-    src/data/abstractrepository.h
-    src/data/databasemanager.cpp
-    src/data/songrepository.h
-    src/data/databasemanager.h
-    src/data/songrepository.cpp
-    src/data/domain.cpp
-    src/data/domain.h
-    src/data/playlistrepository.h
-    src/data/playlistrepository.cpp
-    src/data/albumrepository.h
-    src/data/albumrepository.cpp
-    src/data/accountrepository.h
-    src/data/listenerrepository.h
-    src/data/listenerrepository.cpp
-    src/data/artistrepository.h
-    src/data/artistrepository.cpp
-    src/services/accountservice.h
-    src/services/accountservice.cpp
-    src/services/artistservice.h
-    src/services/artistservice.cpp
-    src/services/listenerservice.h
-    src/services/listenerservice.cpp
-    src/services/playlistservice.h
-    src/services/playlistservice.cpp
-    src/data/accountrepository.cpp
 )
 
 set_target_properties(Parrot PROPERTIES
@@ -45,8 +24,10 @@ set_target_properties(Parrot PROPERTIES
 )
 
 target_link_libraries(Parrot
-    PRIVATE Qt6::Widgets
-            Qt6::Sql
+    PUBLIC
+    Domain
+    Repository
+    Qt6::Widgets
 )
 
 include(GNUInstallDirs)

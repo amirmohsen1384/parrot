@@ -15,7 +15,7 @@ AlbumRepository &AlbumRepository::instance()
     return repository;
 }
 
-std::optional<ID> AlbumRepository::insert(const AlbumData &value)
+std::optional<ID> AlbumRepository::insert(const Album &value)
 {
     QSqlQuery query;
     query.prepare(R"(
@@ -30,9 +30,9 @@ std::optional<ID> AlbumRepository::insert(const AlbumData &value)
             :cover
         )
     )");
-    query.bindValue(":name", value.name);
+    query.bindValue(":name", value.data.name);
     query.bindValue(":artist_id", value.ownerId);
-    query.bindValue(":cover", Utility::Image::toRawData(value.photo));
+    query.bindValue(":cover", Utility::Image::toRawData(value.data.photo));
     if (!query.exec())
     {
         qWarning() << "Failed to insert album:" << query.lastError().text();
@@ -54,7 +54,7 @@ bool AlbumRepository::update(const Album &value)
     )");
     query.bindValue(":id", value.id);
     query.bindValue(":name", value.data.name);
-    query.bindValue(":artist_id", value.data.ownerId);
+    query.bindValue(":artist_id", value.ownerId);
     query.bindValue(":cover", Utility::Image::toRawData(value.data.photo));
     if (!query.exec())
     {
@@ -69,7 +69,7 @@ std::optional<ID> AlbumRepository::save(const Album &value)
 {
     if (value.id == INVALID_ID)
     {
-        return insert(value.data);
+        return insert(value);
     }
     else
     {
@@ -82,7 +82,7 @@ Album AlbumRepository::fromQuery(const QSqlQuery &query)
     Album result;
     result.id = query.value("id").value<ID>();
     result.data.name = query.value("name").toString();
-    result.data.ownerId = query.value("artist_id").value<ID>();
+    result.ownerId = query.value("artist_id").value<ID>();
     result.data.photo = Utility::Image::fromRawData(query.value("cover").toByteArray());
     return result;
 }
