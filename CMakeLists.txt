@@ -12,6 +12,8 @@ add_subdirectory(src/domain)
 
 add_subdirectory(src/repository)
 
+add_subdirectory(src/service)
+
 qt_add_executable(Parrot
     src/main.cpp
 )
@@ -27,6 +29,7 @@ target_link_libraries(Parrot
     PUBLIC
     Domain
     Repository
+    Service
     Qt6::Widgets
 )
 
