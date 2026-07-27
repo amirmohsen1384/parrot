@@ -85,6 +85,7 @@ void DatabaseManager::initialize()
             id INTEGER PRIMARY KEY,
             song_id INTEGER NOT NULL,
             listener_id INTEGER NOT NULL,
+            UNIQUE(listener_id, song_id),
             FOREIGN KEY (song_id) REFERENCES Songs(id) ON DELETE CASCADE,
             FOREIGN KEY (listener_id) REFERENCES Listeners(id) ON DELETE CASCADE
         ))"
