@@ -11,6 +11,7 @@ qt_add_library(Service STATIC
     albumservice.cpp
     abstractservice.h
     abstractservice.cpp
+    authenticationservice.h authenticationservice.cpp
 )
 
 target_include_directories(Service
