@@ -19,6 +19,8 @@ public:
 
     static ListenerRepository& instance();
 
+    bool isLiked(ID listenerId, ID songId) const;
+    bool setLiked(ID listenerId, ID songId, bool liked = true);
 private:
     static Account fromQuery(const QSqlQuery &query);
     std::optional<ID> insert(const Account &value);

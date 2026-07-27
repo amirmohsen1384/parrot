@@ -17,6 +17,75 @@ ListenerRepository& ListenerRepository::instance()
     return repository;
 }
 
+bool ListenerRepository::isLiked(ID listenerId, ID songId) const
+{
+    QSqlQuery query;
+    query.prepare(R"(
+        SELECT
+        song_id,
+        listener_id
+        FROM LikedSongs WHERE
+        listener_id = :listener
+        AND song_id = :song
+    )");
+    query.bindValue(":listener", listenerId);
+    query.bindValue(":song", songId);
+    if (!query.exec())
+    {
+        qWarning() << "Failed to see if the song is liked:" << query.lastError().text();
+        return false;
+    }
+    return query.next();
+}
+
+bool ListenerRepository::setLiked(ID listenerId, ID songId, bool liked)
+{
+    QSqlQuery query;
+    if (liked)
+    {
+        query.prepare(R"(
+            INSERT OR IGNORE INTO LikedSongs(
+                listener_id,
+                song_id
+            )
+            VALUES(
+                :listener,
+                :song
+            )
+        )");
+        query.bindValue(":listener", listenerId);
+        query.bindValue(":song", songId);
+        if (!query.exec())
+        {
+            qWarning() << "Failed to like song:" << query.lastError().text();
+            return false;
+        }
+        else
+        {
+            return query.numRowsAffected() > 0;
+        }
+    }
+    else
+    {
+        query.prepare(R"(
+            DELETE FROM LikedSongs
+            WHERE listener_id = :listener
+            AND song_id = :song
+        )");
+        query.bindValue(":listener", listenerId);
+        query.bindValue(":song", songId);
+        if (!query.exec())
+        {
+            qWarning() << "Failed to unlike song:" << query.lastError().text();
+            return false;
+        }
+        else
+        {
+            return query.numRowsAffected() > 0;
+        }
+    }
+}
+
 Account ListenerRepository::fromQuery(const QSqlQuery &query)
 {
     Account result;
