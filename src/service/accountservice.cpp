@@ -28,6 +28,8 @@ bool AccountService::updateAccount(const AccountData &info)
         result = ListenerRepository::instance().save(target);
         break;
     }
+    case AccountData::Unknown:
+        break;
     }
     if (result.has_value())
     {

@@ -15,6 +15,8 @@ public:
     SongList likedSongs() const;
     PlaylistList playlists() const;
 
+public slots:
+
 signals:
     void likeChanged(ID songId);
 };

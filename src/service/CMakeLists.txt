@@ -10,7 +10,7 @@ qt_add_library(Service STATIC
     albumservice.h
     albumservice.cpp
     abstractservice.h
-    abstractservice.cpp
+
     authenticationservice.h authenticationservice.cpp
 )
 
