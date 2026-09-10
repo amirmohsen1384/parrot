@@ -1,0 +1,12 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/genres">
+        <file>resources/genres/classic.png</file>
+        <file>resources/genres/country.png</file>
+        <file>resources/genres/folk.png</file>
+        <file>resources/genres/jazz.png</file>
+        <file>resources/genres/pop.png</file>
+        <file>resources/genres/rap.png</file>
+        <file>resources/genres/rock.png</file>
+    </qresource>
+</RCC>

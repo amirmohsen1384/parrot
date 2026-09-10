@@ -17,6 +17,7 @@ add_subdirectory(src/service)
 
 qt_add_executable(Parrot
     src/main.cpp
+    resources.qrc
 )
 
 set_target_properties(Parrot PROPERTIES
