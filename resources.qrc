@@ -1,12 +1,12 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/genres">
-        <file>resources/genres/classic.png</file>
-        <file>resources/genres/country.png</file>
-        <file>resources/genres/folk.png</file>
-        <file>resources/genres/jazz.png</file>
-        <file>resources/genres/pop.png</file>
-        <file>resources/genres/rap.png</file>
-        <file>resources/genres/rock.png</file>
+        <file alias="classic.png">resources/genres/classic.png</file>
+        <file alias="country.png">resources/genres/country.png</file>
+        <file alias="folk.png">resources/genres/folk.png</file>
+        <file alias="jazz.png">resources/genres/jazz.png</file>
+        <file alias="pop.png">resources/genres/pop.png</file>
+        <file alias="rap.png">resources/genres/rap.png</file>
+        <file alias="rock.png">resources/genres/rock.png</file>
     </qresource>
 </RCC>
