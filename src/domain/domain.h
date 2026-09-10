@@ -6,6 +6,7 @@
 #include <QString>
 #include <QPixmap>
 #include <QUrl>
+#include <QMetaType>
 
 using ID = qint64;
 
@@ -84,6 +85,8 @@ struct SongData
     qint64 releasedYear = 0;
     Genre genre = Genre::Unknown;
 };
+
+Q_DECLARE_METATYPE(SongData::Genre)
 
 struct Song
 {
