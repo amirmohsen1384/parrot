@@ -6,6 +6,7 @@
 
 class PlaylistService : public AbstractService
 {
+    Q_OBJECT
 public:
     PlaylistService(ID playlistId, QObject *parent = nullptr);
 

@@ -50,3 +50,49 @@ PlaylistList ListenerService::playlists() const
 {
     return PlaylistRepository::instance().playlists(mainAccount.id);
 }
+
+void ListenerService::addPlaylist(const PlaylistData &data)
+{
+    Playlist target;
+    target.data = data;
+    target.ownerId = mainAccount.id;
+    auto result = PlaylistRepository::instance().save(target);
+    if (!result.has_value())
+    {
+        qWarning() << "Failed to add the playlist for the listener.";
+    }
+    else
+    {
+        target.id = *result;
+        emit playlistAdded(target);
+    }
+}
+
+bool ListenerService::removePlaylist(ID playlistId)
+{
+    if (playlistId == INVALID_ID)
+    {
+        qWarning() << "Failed to remove the playlist:" << "Invalid playlist ID.";
+        return false;
+    }
+    auto result = PlaylistRepository::instance().search(playlistId);
+    if (!result)
+    {
+        qWarning() << "Failed to remove the playlist with ID" << playlistId << ":" << "Failed to find the playlist.";
+        return false;
+    }
+    else if (result->ownerId != mainAccount.id)
+    {
+        qWarning() << "Failed to remove the playlist with ID" << playlistId << ":" << "The playlist does not belong to the listener.";
+        return false;
+    }
+    else
+    {
+        auto success = PlaylistRepository::instance().remove(playlistId);
+        if (success)
+        {
+            emit playlistRemoved(playlistId);
+        }
+        return success;
+    }
+}

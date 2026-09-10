@@ -5,6 +5,7 @@
 
 class AlbumService : public AbstractService
 {
+    Q_OBJECT
 public:
     AlbumService(ID albumId, QObject *parent = nullptr);
 

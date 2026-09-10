@@ -5,7 +5,15 @@
 
 PlaylistService::PlaylistService(ID playlistId, QObject *parent) : AbstractService{parent}
 {
-
+    auto result = PlaylistRepository::instance().search(playlistId);
+    if (!result.has_value())
+    {
+        qWarning() << "No playlist associated with ID" << playlistId << "found.";
+    }
+    else
+    {
+        mainPlaylist = *result;
+    }
 }
 
 Account PlaylistService::owner() const

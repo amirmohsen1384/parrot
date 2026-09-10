@@ -16,9 +16,13 @@ public:
     PlaylistList playlists() const;
 
 public slots:
+    void addPlaylist(const PlaylistData &data);
+    bool removePlaylist(ID playlistId);
 
 signals:
     void likeChanged(ID songId);
+    void playlistAdded(const Playlist &playlist);
+    void playlistRemoved(ID value);
 };
 
 #endif // LISTENERSERVICE_H
