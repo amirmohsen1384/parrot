@@ -2,7 +2,9 @@ find_package(Qt6 REQUIRED COMPONENTS Multimedia Gui)
 
 qt_add_library(Elements STATIC
     musicplayer.h
+    photoviewer.h
     musicplayer.cpp
+    photoviewer.cpp
 )
 
 target_include_directories(Elements
@@ -13,8 +15,8 @@ target_include_directories(Elements
 target_link_libraries(Elements
     PUBLIC
     Domain
+    Qt6::Widgets
     Qt6::Multimedia
-    Qt6::Gui
 )
 
 if(WIN32)
