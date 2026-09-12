@@ -1,5 +1,4 @@
-<!DOCTYPE RCC>
-<RCC version="1.0">
+<RCC>
     <qresource prefix="/genres">
         <file alias="classic.png">resources/genres/classic.png</file>
         <file alias="country.png">resources/genres/country.png</file>
@@ -8,5 +7,8 @@
         <file alias="pop.png">resources/genres/pop.png</file>
         <file alias="rap.png">resources/genres/rap.png</file>
         <file alias="rock.png">resources/genres/rock.png</file>
+    </qresource>
+    <qresource prefix="/">
+        <file alias="main.ico">resources/main.ico</file>
     </qresource>
 </RCC>

@@ -20,6 +20,7 @@ add_subdirectory(src/model)
 add_subdirectory(src/elements)
 
 qt_add_executable(Parrot
+    parrot.rc
     src/main.cpp
     resources.qrc
 )
