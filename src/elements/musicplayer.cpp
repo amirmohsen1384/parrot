@@ -1,9 +1,8 @@
-#include "musicplayer.h"
-
-#include <QAudioOutput>
 #include <QDebug>
 #include <QFileInfo>
+#include <QAudioOutput>
 #include <QMediaDevices>
+#include "musicplayer.h"
 
 #ifdef Q_OS_WIN
 #include "windowsmediacontrols.h"
@@ -21,17 +20,17 @@ MusicPlayer::MusicPlayer(QObject *parent) : QObject(parent)
     m_audioOutput = new QAudioOutput(this);
     m_mediaDevices = new QMediaDevices(this);
 
-    m_audioOutput->setDevice(QMediaDevices::defaultAudioOutput());
-    m_audioOutput->setVolume(1.0f);
+    m_audioOutput->setVolume(MaxVolume);
     m_player->setAudioOutput(m_audioOutput);
+    m_audioOutput->setDevice(QMediaDevices::defaultAudioOutput());
 
-    connect(m_player, &QMediaPlayer::playbackStateChanged, this, &MusicPlayer::playbackStateChanged);
-    connect(m_player, &QMediaPlayer::mediaStatusChanged, this, &MusicPlayer::onMediaStatusChanged);
+    connect(m_player, &QMediaPlayer::errorOccurred, this, &MusicPlayer::onErrorOccurred);
+    connect(m_audioOutput, &QAudioOutput::mutedChanged, this, &MusicPlayer::mutedChanged);
     connect(m_player, &QMediaPlayer::positionChanged, this, &MusicPlayer::positionChanged);
     connect(m_player, &QMediaPlayer::durationChanged, this, &MusicPlayer::durationChanged);
-    connect(m_player, &QMediaPlayer::errorOccurred, this, &MusicPlayer::onErrorOccurred);
     connect(m_audioOutput, &QAudioOutput::volumeChanged, this, &MusicPlayer::volumeChanged);
-    connect(m_audioOutput, &QAudioOutput::mutedChanged, this, &MusicPlayer::mutedChanged);
+    connect(m_player, &QMediaPlayer::mediaStatusChanged, this, &MusicPlayer::onMediaStatusChanged);
+    connect(m_player, &QMediaPlayer::playbackStateChanged, this, &MusicPlayer::playbackStateChanged);
     connect(m_audioOutput, &QAudioOutput::deviceChanged, this, &MusicPlayer::onAudioOutputDeviceChanged);
     connect(m_mediaDevices, &QMediaDevices::audioOutputsChanged, this, &MusicPlayer::onAudioOutputsChanged);
 
@@ -102,11 +101,12 @@ QAudioDevice MusicPlayer::audioOutputDevice() const
 
 void MusicPlayer::setSong(const Song &song)
 {
-    const bool songChanged = m_currentSong.id != song.id
-                             || m_currentSong.data.fileName != song.data.fileName
-                             || m_currentSong.data.name != song.data.name;
     m_currentSong = song;
     applySource(song.data.fileName);
+    const bool songChanged =
+        m_currentSong.id != song.id
+        || m_currentSong.data.fileName != song.data.fileName
+        || m_currentSong.data.name != song.data.name;
     if (songChanged)
         emit currentSongChanged(m_currentSong);
 }
@@ -115,7 +115,8 @@ void MusicPlayer::clear()
 {
     m_player->stop();
     m_player->setSource(QUrl());
-    if (hasSong() || !m_currentSong.data.fileName.isEmpty()) {
+    if (hasSong() || !m_currentSong.data.fileName.isEmpty())
+    {
         m_currentSong = Song {};
         emit currentSongChanged(m_currentSong);
     }
@@ -123,7 +124,8 @@ void MusicPlayer::clear()
 
 void MusicPlayer::play()
 {
-    if (!hasSource()) {
+    if (!hasSource())
+    {
         qWarning() << "MusicPlayer::play: no media source loaded.";
         return;
     }
@@ -139,21 +141,25 @@ void MusicPlayer::play(const Song &song)
 void MusicPlayer::pause()
 {
     if (m_player->playbackState() != QMediaPlayer::PlayingState)
+    {
         return;
+    }
     m_player->pause();
 }
 
 void MusicPlayer::resume()
 {
     if (m_player->playbackState() != QMediaPlayer::PausedState)
+    {
         return;
+    }
     m_player->play();
 }
 
 void MusicPlayer::stop()
 {
-    if (m_player->playbackState() == QMediaPlayer::StoppedState
-        && m_player->position() == 0) {
+    if (m_player->playbackState() == QMediaPlayer::StoppedState && m_player->position() == 0)
+    {
         return;
     }
     m_player->stop();
@@ -162,30 +168,32 @@ void MusicPlayer::stop()
 void MusicPlayer::togglePlayPause()
 {
     if (m_player->playbackState() == QMediaPlayer::PlayingState)
+    {
         pause();
+    }
     else
+    {
         play();
+    }
 }
 
 void MusicPlayer::setPosition(qint64 positionMs)
 {
     if (!hasSource())
+    {
         return;
+    }
     m_player->setPosition(clampedPosition(positionMs));
 }
 
 void MusicPlayer::seekForward(qint64 offsetMs)
 {
-    if (offsetMs < 0)
-        offsetMs = -offsetMs;
-    setPosition(position() + offsetMs);
+    setPosition(position() + qAbs(offsetMs));
 }
 
 void MusicPlayer::seekBackward(qint64 offsetMs)
 {
-    if (offsetMs < 0)
-        offsetMs = -offsetMs;
-    setPosition(position() - offsetMs);
+    setPosition(position() - qAbs(offsetMs));
 }
 
 void MusicPlayer::setVolume(float volume)
@@ -226,14 +234,18 @@ void MusicPlayer::requestPrevious()
 void MusicPlayer::onAudioOutputsChanged()
 {
     if (m_followDefaultOutput || !isCurrentDeviceAvailable())
+    {
         syncAudioOutputToDefault(true);
+    }
 }
 
 void MusicPlayer::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
 {
     emit mediaStatusChanged(status);
     if (status == QMediaPlayer::EndOfMedia)
+    {
         emit playbackFinished();
+    }
 }
 
 void MusicPlayer::onErrorOccurred(QMediaPlayer::Error error, const QString &errorString)
@@ -248,29 +260,28 @@ void MusicPlayer::onAudioOutputDeviceChanged()
 
 void MusicPlayer::applySource(const QUrl &source)
 {
-    if (source.isEmpty()) {
+    if (source.isEmpty())
+    {
         m_player->stop();
         m_player->setSource(QUrl());
         return;
     }
-
-    if (source.isLocalFile()) {
+    if (source.isLocalFile())
+    {
         const QFileInfo info(source.toLocalFile());
-        if (!info.exists() || !info.isFile()) {
+        if (!info.exists() || !info.isFile())
+        {
             m_player->stop();
             m_player->setSource(QUrl());
-            emit errorOccurred(QMediaPlayer::ResourceError,
-                               QStringLiteral("Audio file does not exist: %1")
-                                   .arg(source.toLocalFile()));
+            emit errorOccurred(QMediaPlayer::ResourceError, QStringLiteral("Audio file does not exist: %1").arg(source.toLocalFile()));
             return;
         }
     }
-
-    if (m_player->source() == source) {
+    if (m_player->source() == source)
+    {
         m_player->setPosition(0);
         return;
     }
-
     m_player->stop();
     m_player->setSource(source);
 }
@@ -279,7 +290,9 @@ void MusicPlayer::syncAudioOutputToDefault(bool force)
 {
     const QAudioDevice defaultDevice = QMediaDevices::defaultAudioOutput();
     if (!force && m_audioOutput->device() == defaultDevice)
+    {
         return;
+    }
     m_audioOutput->setDevice(defaultDevice);
     m_followDefaultOutput = true;
 }
@@ -289,7 +302,9 @@ qint64 MusicPlayer::clampedPosition(qint64 positionMs) const
     positionMs = qMax(0LL, positionMs);
     const qint64 total = m_player->duration();
     if (total > 0)
+    {
         positionMs = qMin(positionMs, total);
+    }
     return positionMs;
 }
 
@@ -297,12 +312,16 @@ bool MusicPlayer::isCurrentDeviceAvailable() const
 {
     const QAudioDevice current = m_audioOutput->device();
     if (current.isNull())
+    {
         return false;
-
+    }
     const QList<QAudioDevice> outputs = QMediaDevices::audioOutputs();
-    for (const QAudioDevice &device : outputs) {
+    for (const QAudioDevice &device : outputs)
+    {
         if (device.id() == current.id())
+        {
             return true;
+        }
     }
     return false;
 }

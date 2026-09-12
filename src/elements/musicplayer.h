@@ -17,9 +17,9 @@ class MusicPlayer : public QObject
 public:
     explicit MusicPlayer(QObject *parent = nullptr);
 
-    Song currentSong() const;
     bool hasSong() const;
     bool hasSource() const;
+    Song currentSong() const;
 
     QMediaPlayer::PlaybackState playbackState() const;
     QMediaPlayer::MediaStatus mediaStatus() const;
