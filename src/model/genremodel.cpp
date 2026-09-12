@@ -28,8 +28,7 @@ namespace
     }
 }
 
-GenreModel::GenreModel(QObject *parent)
-    : QAbstractListModel(parent)
+GenreModel::GenreModel(QObject *parent) : QAbstractListModel(parent)
 {
     const QDir dir(QStringLiteral(":/genres"));
     const QStringList files = dir.entryList({QStringLiteral("*.png")}, QDir::Files, QDir::Name);

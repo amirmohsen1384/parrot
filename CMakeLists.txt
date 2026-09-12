@@ -5,7 +5,7 @@ project(Parrot VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Multimedia)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -16,6 +16,8 @@ add_subdirectory(src/repository)
 add_subdirectory(src/service)
 
 add_subdirectory(src/model)
+
+add_subdirectory(src/elements)
 
 qt_add_executable(Parrot
     src/main.cpp
@@ -35,7 +37,9 @@ target_link_libraries(Parrot
     Repository
     Service
     Model
+    Elements
     Qt6::Widgets
+    Qt6::Multimedia
 )
 
 include(GNUInstallDirs)
