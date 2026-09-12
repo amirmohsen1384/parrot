@@ -16,7 +16,6 @@ public:
 
 private:
     QImage photo;
-    bool isInside;
 };
 
 #endif // PHOTOVIEWER_H
