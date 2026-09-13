@@ -17,7 +17,7 @@ add_subdirectory(src/service)
 
 add_subdirectory(src/model)
 
-add_subdirectory(src/elements)
+add_subdirectory(src/element)
 
 qt_add_executable(Parrot
     parrot.rc
@@ -38,7 +38,7 @@ target_link_libraries(Parrot
     Repository
     Service
     Model
-    Elements
+    Element
     Qt6::Widgets
     Qt6::Multimedia
 )

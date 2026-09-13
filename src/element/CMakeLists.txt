@@ -1,18 +1,18 @@
 find_package(Qt6 REQUIRED COMPONENTS Multimedia Gui)
 
-qt_add_library(Elements STATIC
+qt_add_library(Element STATIC
     musicplayer.h
     photoviewer.h
     musicplayer.cpp
     photoviewer.cpp
 )
 
-target_include_directories(Elements
+target_include_directories(Element
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries(Elements
+target_link_libraries(Element
     PUBLIC
     Domain
     Qt6::Widgets
@@ -20,12 +20,12 @@ target_link_libraries(Elements
 )
 
 if(WIN32)
-    target_sources(Elements
+    target_sources(Element
         PRIVATE
             windowsmediacontrols.h
             windowsmediacontrols.cpp
     )
-    target_link_libraries(Elements
+    target_link_libraries(Element
         PUBLIC
             windowsapp
             runtimeobject
